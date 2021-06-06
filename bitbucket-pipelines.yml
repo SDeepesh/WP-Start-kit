@@ -1,0 +1,73 @@
+# This is the build configuration for Bitbucket to push to WPEngine.
+
+image: edbizarro/gitlab-ci-pipeline-php:7.4-alpine
+options:
+  max-time: 15
+pipelines:
+    branches:
+        development:
+            - step:
+                caches:
+                    - node
+                    - composer
+                name: Build & Deploy - Development
+                deployment: dev-scwpstarter03
+                clone:
+                    depth: full
+                script:
+                    # Build
+                    - cd wp-content/themes/sc-webshop
+                    - composer install
+                    - git add vendor/* -f
+                    - npm install
+                    - npm run build
+                    - echo "Add Theme Dist files"
+                    - git add -f dist/*
+                    - 'git commit -m "ci: add dist files"'
+                    # Deploy to WPE
+                    - git push -f git@git.wpengine.com:production/scwpstarter03.git
+                    - echo "Pushed to Development"
+        staging:
+            - step:
+                caches:
+                    - node
+                    - composer
+                name: Build & Deploy - Staging
+                deployment: stage-scwpstarter02
+                clone:
+                    depth: full
+                script:
+                    # Build
+                    - cd wp-content/themes/sc-webshop
+                    - composer install
+                    - git add vendor/* -f
+                    - npm install
+                    - npm run build
+                    - echo "Add Theme Dist files"
+                    - git add -f dist/*
+                    - 'git commit -m "ci: add dist files"'
+                    # Deploy to WPE
+                    - git push -f git@git.wpengine.com:production/scwpstarter02.git
+                    - echo "Pushed to Staging"
+        master:
+            - step:
+                caches:
+                    - node
+                    - composer
+                name: Build & Deploy - Production
+                deployment: prod-scwpstarter01
+                clone:
+                    depth: full
+                script:
+                    # Build
+                    - cd wp-content/themes/sc-webshop
+                    - composer install
+                    - git add vendor/* -f
+                    - npm install
+                    - npm run build
+                    - echo "Add Theme Dist files"
+                    - git add -f dist/*
+                    - 'git commit -m "ci: add dist files"'
+                    # Deploy to WPE
+                    - git push -f git@git.wpengine.com:production/scwpstarter01.git
+                    - echo "Pushed to Production"
